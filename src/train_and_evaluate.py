@@ -4,6 +4,7 @@
 
 import os
 import pandas as pd
+import numpy as np
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import ElasticNet
@@ -30,25 +31,56 @@ def train_and_evaluate(config_path):
     alpha=config["estimators"]["ElasticNet"]["params"]["alpha"]
     l1_ratio=config["estimators"]["ElasticNet"]["params"]["l1_ratio"]
     target=config["base"]["target_col"]
-    
+
     train= pd.read_csv(train_data_path, sep=",")
     test= pd.read_csv(test_data_path, sep=",")
-    
+
     train_y= train[target]
     test_y= test[target]
-    
+
     train_x= train.drop(target, axis=1)
     test_x= test.drop(target, axis=1)
-    
+
     lr= ElasticNet(
         alpha=alpha,
         l1_ratio=l1_ratio,
         random_state=random_state)
-    
+
     lr.fit(train_x, train_y)
     predicted_qualities= lr.predict(test_x)
-    
+
     (rmse, mae, r2) = eval_metrics(test_y, predicted_qualities)
+
+    print("Elasticnet model (alpha=%f, l1_ratio=%f):" % (alpha, l1_ratio))
+    print(f"  RMSE: {rmse}")
+    print(f"  MAE: {mae}")
+    print(f"  R2: {r2}")
+
+    #####################################################
+    scores_file = config["reports"]["scores"]
+    params_file = config["reports"]["params"]
+
+    with open(scores_file, "w") as f:
+        scores = {
+            "rmse": rmse,
+            "mae": mae,
+            "r2": r2
+        }
+        json.dump(scores, f, indent=4)
+
+    with open(params_file, "w") as f:
+        params = {
+            "alpha": alpha,
+            "l1_ratio": l1_ratio,
+        }
+        json.dump(params, f, indent=4)
+    #####################################################
+
+
+    os.makedirs(model_dir, exist_ok=True)
+    model_path = os.path.join(model_dir, "model.joblib")
+
+    joblib.dump(lr, model_path)
     
 
 
