@@ -21,7 +21,7 @@
     },
     "free_sulfur_dioxide": {
         "min": 1.0,
-        "max": 68.0
+        "max": 72.0
     },
     "total_sulfur_dioxide": {
         "min": 6.0,
@@ -42,9 +42,5 @@
     "alcohol": {
         "min": 8.4,
         "max": 14.9
-    },
-    "quality": {
-        "min": 3.0,
-        "max": 8.0
     }
 }
